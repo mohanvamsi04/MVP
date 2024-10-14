@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Environmental Monitoring Dashboard - Bar Charts</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .bar-charts {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      canvas {
+        max-width: 100%;
+      }
+
+      .back-button {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px 20px;
+        margin-top: 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+      }
+
+      .back-button:hover {
+        background-color: #45a049;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1>Environmental Monitoring Dashboard - Bar Charts</h1>
+    <div class="bar-charts">
+      <canvas id="temperatureBarChart"></canvas>
+      <canvas id="doBarChart"></canvas>
+      <canvas id="phBarChart"></canvas>
+    </div>
+
+    <a href="M1.html" class="back-button">Go Back to Table</a>
+
+    <script>
+      const apiUrl =
+        "https://l6h0ffi6vf.execute-api.us-east-1.amazonaws.com/AquaSentinel02-Stage01/";
+
+      async function fetchData() {
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data); // Log data to check if it’s correctly fetched
+          createBarCharts(data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+
+      function createBarCharts(data) {
+        const labels = data.map((record) =>
+          new Date(record.timestamp).toLocaleString()
+        );
+
+        new Chart(
+          document.getElementById("temperatureBarChart").getContext("2d"),
+          {
+            type: "bar",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "Temperature (°C)",
+                  data: data.map((record) => record.temperature),
+                  backgroundColor: "rgba(54, 162, 235, 0.6)",
+                },
+              ],
+            },
+            options: {
+              scales: {
+                y: {
+                  title: {
+                    display: true,
+                    text: "Temperature (°C)", // Y-axis label
+                  },
+                },
+              },
+            },
+          }
+        );
+
+        new Chart(document.getElementById("doBarChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Dissolved Oxygen (mg/L)",
+                data: data.map((record) => record.dissolved_oxygen),
+                backgroundColor: "rgba(75, 192, 192, 0.6)",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                title: {
+                  display: true,
+                  text: "Dissolved Oxygen (mg/L)", // Y-axis label
+                },
+              },
+            },
+          },
+        });
+
+        new Chart(document.getElementById("phBarChart").getContext("2d"), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "pH Value",
+                data: data.map((record) => record.ph_value),
+                backgroundColor: "rgba(255, 99, 132, 0.6)",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                title: {
+                  display: true,
+                  text: "pH Value", // Y-axis label
+                },
+              },
+            },
+          },
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchData);
+    </script>
+  </body>
+</html>
